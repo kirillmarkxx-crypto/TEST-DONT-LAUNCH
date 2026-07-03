@@ -1,6 +1,6 @@
 -- ============================================
--- FRACTURE UI v4.0 - УНИВЕРСАЛЬНАЯ
--- Работает с ЛЮБЫМИ играми и ЛЮБЫМ количеством вкладок
+-- FRACTURE UI v5.0 - КРАСИВАЯ УНИВЕРСАЛЬНАЯ
+-- Со всеми иконками, адаптивная, для любых игр
 -- ============================================
 
 local FractureUI = {}
@@ -22,7 +22,83 @@ local function getGuiParent()
 end
 local UI_PARENT = getGuiParent()
 
--- ЦВЕТА
+-- ============================================
+-- ВСЕ ИКОНКИ (ВСТРОЕНЫ)
+-- ============================================
+local ICONS = {
+    -- ОСНОВНЫЕ
+    home = "rbxassetid://7743872758",
+    settings = "rbxassetid://7734053495",
+    info = "rbxassetid://7733964719",
+    search = "rbxassetid://7734052925",
+    folder = "rbxassetid://7733799185",
+    save = "rbxassetid://7734052335",
+    trash = "rbxassetid://7743873772",
+    refresh = "rbxassetid://7734051052",
+    
+    -- ИГРОК
+    player = "rbxassetid://7743872758",
+    health = "rbxassetid://7733965118",
+    speed = "rbxassetid://7733771628",
+    jump = "rbxassetid://7733798747",
+    armor = "rbxassetid://7734056608",
+    sword = "rbxassetid://7743875962",
+    shield = "rbxassetid://7734056608",
+    
+    -- ВИЗУАЛ
+    eye = "rbxassetid://7733774602",
+    esp = "rbxassetid://7733774602",
+    glow = "rbxassetid://7734056608",
+    color = "rbxassetid://7733965118",
+    brightness = "rbxassetid://7734053495",
+    fog = "rbxassetid://7734052925",
+    
+    -- ОРУЖИЕ/БОЙ
+    target = "rbxassetid://7743872758",
+    aim = "rbxassetid://7743872758",
+    crosshair = "rbxassetid://7743872758",
+    bullet = "rbxassetid://7743875962",
+    fire = "rbxassetid://7733798747",
+    explosion = "rbxassetid://7733798747",
+    knife = "rbxassetid://7743875962",
+    gun = "rbxassetid://7743875962",
+    
+    -- СОЦСЕТИ
+    telegram = "rbxassetid://7733964719",
+    discord = "rbxassetid://7733964719",
+    youtube = "rbxassetid://7733964719",
+    github = "rbxassetid://7733964719",
+    link = "rbxassetid://7743866903",
+    
+    -- УПРАВЛЕНИЕ
+    minimize = "rbxassetid://7733997870",
+    close = "rbxassetid://7743878857",
+    lock = "rbxassetid://7733965118",
+    unlock = "rbxassetid://7733965118",
+    check = "rbxassetid://7733715400",
+    alert = "rbxassetid://7733658504",
+    
+    -- РАЗНОЕ
+    star = "rbxassetid://7733715400",
+    heart = "rbxassetid://7733965118",
+    trophy = "rbxassetid://7733965118",
+    clock = "rbxassetid://7734053495",
+    map = "rbxassetid://7734052925",
+    wifi = "rbxassetid://7733965118",
+    battery = "rbxassetid://7734053495",
+    cpu = "rbxassetid://7733765045",
+    
+    -- СТРЕЛКИ
+    arrowUp = "rbxassetid://7733717447",
+    arrowDown = "rbxassetid://7733717447",
+    arrowLeft = "rbxassetid://7733717447",
+    arrowRight = "rbxassetid://7733717447",
+    chevron = "rbxassetid://7733717447",
+}
+
+-- ============================================
+-- КРАСИВЫЕ ЦВЕТА
+-- ============================================
 local C = {
     Bg          = Color3.fromRGB(10, 11, 16),
     Sidebar     = Color3.fromRGB(7, 8, 13),
@@ -42,16 +118,9 @@ local C = {
     Logo        = Color3.fromRGB(140, 120, 255),
 }
 
-local Icons = {
-    home     = "rbxassetid://7743872758",
-    sliders  = "rbxassetid://7743875962",
-    eye      = "rbxassetid://7733774602",
-    flame    = "rbxassetid://7733798747",
-    settings = "rbxassetid://7734053495",
-    minimize = "rbxassetid://7733997870",
-    close    = "rbxassetid://7743878857",
-}
-
+-- ============================================
+-- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+-- ============================================
 local function new(class, props)
     local o = Instance.new(class)
     if props then
@@ -80,7 +149,9 @@ local function ustroke(p, col, t, tr)
     return s
 end
 
--- УВЕДОМЛЕНИЯ
+-- ============================================
+-- УВЕДОМЛЕНИЯ (КРАСИВЫЕ)
+-- ============================================
 local NotificationsGui = nil
 local activeNotifs = {}
 local notificationEnabled = true
@@ -140,7 +211,7 @@ local function notify(text, kind, duration, force)
         Size = UDim2.fromOffset(18, 18),
         Position = UDim2.fromOffset(9, 9),
         BackgroundTransparency = 1,
-        Image = "rbxassetid://7733715400",
+        Image = ICONS.check,
         ImageColor3 = color,
         ZIndex = 1002,
     })
@@ -245,7 +316,7 @@ function FractureUI:CreateWindow(config)
         DisplayOrder = 99100,
     })
 
-    -- Основное окно
+    -- КРАСИВОЕ ОКНО
     local Main = new("Frame", {
         Parent = ScreenGui,
         Name = "Main",
@@ -257,7 +328,7 @@ function FractureUI:CreateWindow(config)
     corner(Main, 14)
     ustroke(Main, C.Border, 1, 0.4)
 
-    -- Sidebar
+    -- САЙДБАР
     local Sidebar = new("Frame", {
         Parent = Main,
         Name = "Sidebar",
@@ -267,7 +338,7 @@ function FractureUI:CreateWindow(config)
     })
     corner(Sidebar, 14)
 
-    -- Logo
+    -- ЛОГО
     new("TextLabel", {
         Parent = Sidebar,
         Size = UDim2.fromOffset(40, 40),
@@ -279,7 +350,7 @@ function FractureUI:CreateWindow(config)
         Font = Enum.Font.GothamBlack,
     })
 
-    -- Top Bar
+    -- ВЕРХНЯЯ ПАНЕЛЬ
     local TopBar = new("Frame", {
         Parent = Main,
         Size = UDim2.new(1, -80, 0, 50),
@@ -287,6 +358,7 @@ function FractureUI:CreateWindow(config)
         BackgroundTransparency = 1,
     })
 
+    -- КНОПКА ЗАКРЫТИЯ
     local CloseBtn = new("TextButton", {
         Parent = TopBar,
         Size = UDim2.fromOffset(32, 32),
@@ -302,10 +374,11 @@ function FractureUI:CreateWindow(config)
         Size = UDim2.fromOffset(16, 16),
         Position = UDim2.fromOffset(8, 8),
         BackgroundTransparency = 1,
-        Image = Icons.close,
+        Image = ICONS.close,
         ImageColor3 = C.TextDim,
     })
 
+    -- КНОПКА СВОРАЧИВАНИЯ
     local MinBtn = new("TextButton", {
         Parent = TopBar,
         Size = UDim2.fromOffset(32, 32),
@@ -321,11 +394,11 @@ function FractureUI:CreateWindow(config)
         Size = UDim2.fromOffset(16, 16),
         Position = UDim2.fromOffset(8, 8),
         BackgroundTransparency = 1,
-        Image = Icons.minimize,
+        Image = ICONS.minimize,
         ImageColor3 = C.TextDim,
     })
 
-    -- Avatar
+    -- АВАТАР
     local AvatarBox = new("Frame", {
         Parent = Sidebar,
         Size = UDim2.fromOffset(40, 40),
@@ -350,7 +423,7 @@ function FractureUI:CreateWindow(config)
         if ok and content then AvatarImg.Image = content end
     end)
 
-    -- Content area
+    -- КОНТЕНТ
     local Content = new("Frame", {
         Parent = Main,
         Size = UDim2.new(1, -80, 1, -80),
@@ -359,20 +432,19 @@ function FractureUI:CreateWindow(config)
     })
 
     -- ============================================
-    -- ДИНАМИЧЕСКИЕ ВКЛАДКИ (ЛЮБОЕ КОЛИЧЕСТВО)
+    -- ДИНАМИЧЕСКИЕ ВКЛАДКИ С ИКОНКАМИ
     -- ============================================
     local Tabs = {}
     local CurrentTab = nil
     local tabButtons = {}
 
-    function FractureUI:CreateTab(name, icon)
-        icon = icon or Icons.sliders
-        local key = name:gsub("%s+", ""):lower() .. #tabButtons + 1
-
-        -- Кнопка в сайдбаре
+    function FractureUI:CreateTab(name, iconKey)
+        local icon = ICONS[iconKey] or ICONS.home
+        
+        -- КНОПКА В САЙДБАРЕ
         local btn = new("TextButton", {
             Parent = Sidebar,
-            Name = "Tab_" .. key,
+            Name = "Tab_" .. name:gsub("%s+", ""),
             Size = UDim2.fromOffset(40, 40),
             Position = UDim2.fromOffset(10, 80 + #tabButtons * 48),
             BackgroundColor3 = C.PanelInner,
@@ -390,7 +462,7 @@ function FractureUI:CreateWindow(config)
             ImageColor3 = C.TextDim,
         })
 
-        -- Контент вкладки
+        -- КОНТЕНТ ВКЛАДКИ
         local content = new("Frame", {
             Parent = Content,
             Size = UDim2.fromScale(1, 1),
@@ -409,46 +481,47 @@ function FractureUI:CreateWindow(config)
             button = btn,
             image = img,
             content = content,
-            key = key,
+            key = name,
             name = name,
         }
         table.insert(tabButtons, tabData)
-        Tabs[key] = tabData
+        Tabs[name] = tabData
 
-        -- Клик по кнопке
+        -- КЛИК ПО КНОПКЕ
         btn.MouseButton1Click:Connect(function()
             for _, t in ipairs(tabButtons) do
                 t.content.Visible = (t == tabData)
                 t.button.BackgroundTransparency = (t == tabData) and 0 or 1
                 t.image.ImageColor3 = (t == tabData) and C.Logo or C.TextDim
             end
-            CurrentTab = key
+            CurrentTab = name
         end)
 
-        -- Ховер
+        -- ХОВЕР
         btn.MouseEnter:Connect(function()
-            if CurrentTab ~= key then
+            if CurrentTab ~= name then
                 TweenService:Create(img, TweenInfo.new(0.15), {ImageColor3 = C.Text}):Play()
             end
         end)
         btn.MouseLeave:Connect(function()
-            if CurrentTab ~= key then
+            if CurrentTab ~= name then
                 TweenService:Create(img, TweenInfo.new(0.15), {ImageColor3 = C.TextDim}):Play()
             end
         end)
 
-        -- Если первая вкладка - активируем
+        -- ПЕРВАЯ ВКЛАДКА АКТИВНА
         if #tabButtons == 1 then
-            CurrentTab = key
+            CurrentTab = name
             btn.BackgroundTransparency = 0
             img.ImageColor3 = C.Logo
         end
 
         -- ============================================
-        -- МЕТОДЫ ДЛЯ ЭЛЕМЕНТОВ ВНУТРИ ВКЛАДКИ
+        -- ЭЛЕМЕНТЫ ВНУТРИ ВКЛАДКИ
         -- ============================================
         local tabApi = {
             content = content,
+            
             CreateToggle = function(self, label, default, callback)
                 local row = new("Frame", {
                     Parent = content,
@@ -739,6 +812,109 @@ function FractureUI:CreateWindow(config)
                     getKey = function() return current end,
                 }
             end,
+
+            CreateDropdown = function(self, label, options, default, callback)
+                local row = new("Frame", {
+                    Parent = content,
+                    Size = UDim2.new(1, 0, 0, 36),
+                    BackgroundTransparency = 1,
+                })
+                new("TextLabel", {
+                    Parent = row,
+                    Size = UDim2.new(1, -180, 1, 0),
+                    BackgroundTransparency = 1,
+                    Text = label,
+                    TextColor3 = C.TextDim,
+                    TextSize = 13,
+                    Font = Enum.Font.Gotham,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                })
+                local dd = new("TextButton", {
+                    Parent = row,
+                    Size = UDim2.fromOffset(150, 28),
+                    Position = UDim2.new(1, -150, 0.5, -14),
+                    BackgroundColor3 = C.PanelInner,
+                    BorderSizePixel = 0,
+                    Text = "",
+                    AutoButtonColor = false,
+                })
+                corner(dd, 6)
+                local txtL = new("TextLabel", {
+                    Parent = dd,
+                    Size = UDim2.new(1, -28, 1, 0),
+                    Position = UDim2.fromOffset(10, 0),
+                    BackgroundTransparency = 1,
+                    Text = tostring(default),
+                    TextColor3 = C.Text,
+                    TextSize = 12,
+                    Font = Enum.Font.GothamMedium,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                })
+                local arrow = new("ImageLabel", {
+                    Parent = dd,
+                    Size = UDim2.fromOffset(14, 14),
+                    Position = UDim2.new(1, -22, 0.5, -7),
+                    BackgroundTransparency = 1,
+                    Image = ICONS.chevron,
+                    ImageColor3 = C.TextDim,
+                })
+                local current = default
+                local function setValue(v)
+                    for _, opt in ipairs(options) do
+                        if tostring(opt) == tostring(v) then
+                            current = opt
+                            txtL.Text = tostring(opt)
+                            if callback then pcall(callback, opt) end
+                            return
+                        end
+                    end
+                end
+                dd.MouseButton1Click:Connect(function()
+                    local pop = new("Frame", {
+                        Parent = OverlayGui,
+                        Size = UDim2.fromOffset(150, 0),
+                        BackgroundColor3 = C.Panel,
+                        BorderSizePixel = 0,
+                        Visible = true,
+                        ClipsDescendants = true,
+                    })
+                    corner(pop, 10)
+                    ustroke(pop, C.BorderBrt, 1, 0.3)
+                    new("UIListLayout", {SortOrder = Enum.SortOrder.LayoutOrder, Parent = pop})
+                    new("UIPadding", { Parent = pop, PaddingTop = UDim.new(0, 4), PaddingBottom = UDim.new(0, 4), PaddingLeft = UDim.new(0, 4), PaddingRight = UDim.new(0, 4) })
+                    local p = dd.AbsolutePosition
+                    local s = dd.AbsoluteSize
+                    pop.Position = UDim2.fromOffset(p.X, p.Y + s.Y + 4)
+                    for i, opt in ipairs(options) do
+                        local item = new("TextButton", {
+                            Parent = pop,
+                            Size = UDim2.new(1, 0, 0, 26),
+                            BackgroundColor3 = C.PanelHover,
+                            BackgroundTransparency = 1,
+                            BorderSizePixel = 0,
+                            Text = "  " .. tostring(opt),
+                            TextColor3 = (tostring(opt) == tostring(current)) and C.Accent or C.Text,
+                            TextSize = 12,
+                            Font = Enum.Font.Gotham,
+                            TextXAlignment = Enum.TextXAlignment.Left,
+                            AutoButtonColor = false,
+                            LayoutOrder = i,
+                        })
+                        corner(item, 5)
+                        item.MouseEnter:Connect(function() item.BackgroundTransparency = 0 end)
+                        item.MouseLeave:Connect(function() item.BackgroundTransparency = 1 end)
+                        item.MouseButton1Click:Connect(function()
+                            setValue(opt)
+                            pop:Destroy()
+                        end)
+                    end
+                    pop.Size = UDim2.fromOffset(150, math.min(#options, 6) * 26 + 8)
+                end)
+                return {
+                    setValue = setValue,
+                    getValue = function() return current end,
+                }
+            end,
         }
 
         return tabApi
@@ -862,7 +1038,7 @@ function FractureUI:CreateWindow(config)
         end)
     end)
 
-    -- Перетаскивание
+    -- ПЕРЕТАСКИВАНИЕ
     local dragging = false
     local dragStart, startPos
     local dragHandle = new("TextButton", {
@@ -900,7 +1076,7 @@ function FractureUI:CreateWindow(config)
         end
     end)
 
-    -- Бинд для открытия/закрытия
+    -- БИНД
     UserInputService.InputBegan:Connect(function(input, gp)
         if gp then return end
         if input.KeyCode == bindKey then
@@ -934,6 +1110,7 @@ function FractureUI:CreateWindow(config)
             setMinimized(false)
         end,
         colors = C,
+        icons = ICONS,
         CreateTab = FractureUI.CreateTab,
     }
 
