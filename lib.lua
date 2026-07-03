@@ -1,6 +1,5 @@
 -- ============================================
--- FRACTURE UI v2.0 - ИСПРАВЛЕННАЯ БИБЛИОТЕКА
--- + Key System, UIListLayout, фикс clamp
+-- FRACTURE UI v3.0 - РАБОЧАЯ ВЕРСИЯ
 -- ============================================
 
 local FractureUI = {}
@@ -10,8 +9,6 @@ local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
-local HttpService = game:GetService("HttpService")
-local GuiService = game:GetService("GuiService")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
@@ -31,7 +28,6 @@ local UI_PARENT = getGuiParent()
 -- ============================================
 local C = {
     Bg          = Color3.fromRGB(10, 11, 16),
-    BgDeep      = Color3.fromRGB(5, 6, 10),
     Sidebar     = Color3.fromRGB(7, 8, 13),
     Panel       = Color3.fromRGB(12, 14, 20),
     PanelInner  = Color3.fromRGB(20, 22, 32),
@@ -44,91 +40,76 @@ local C = {
     Success     = Color3.fromRGB(95, 220, 130),
     Warning     = Color3.fromRGB(255, 200, 100),
     Danger      = Color3.fromRGB(235, 90, 100),
-    Info        = Color3.fromRGB(100, 170, 255),
-    Telegram    = Color3.fromRGB(42, 171, 238),
-    Discord     = Color3.fromRGB(88, 101, 242),
     Accent      = Color3.fromRGB(124, 109, 242),
     AccentHover = Color3.fromRGB(140, 125, 255),
-    AccentSoft  = Color3.fromRGB(70, 60, 160),
     Logo        = Color3.fromRGB(140, 120, 255),
 }
 
-local Themes = {
-    Purple = { Accent = Color3.fromRGB(124, 109, 242), AccentHover = Color3.fromRGB(140, 125, 255), AccentSoft = Color3.fromRGB(70, 60, 160), Logo = Color3.fromRGB(140, 120, 255) },
-    Blue   = { Accent = Color3.fromRGB(80, 140, 255), AccentHover = Color3.fromRGB(100, 160, 255), AccentSoft = Color3.fromRGB(50, 90, 180), Logo = Color3.fromRGB(110, 165, 255) },
-    Red    = { Accent = Color3.fromRGB(235, 80, 90), AccentHover = Color3.fromRGB(250, 100, 110), AccentSoft = Color3.fromRGB(170, 50, 60), Logo = Color3.fromRGB(245, 100, 110) },
-    Green  = { Accent = Color3.fromRGB(80, 200, 130), AccentHover = Color3.fromRGB(100, 220, 150), AccentSoft = Color3.fromRGB(50, 140, 90), Logo = Color3.fromRGB(110, 220, 150) },
+local Icons = {
+    home     = "rbxassetid://7743872758",
+    sliders  = "rbxassetid://7743875962",
+    eye      = "rbxassetid://7733774602",
+    flame    = "rbxassetid://7733798747",
+    settings = "rbxassetid://7734053495",
+    minimize = "rbxassetid://7733997870",
+    close    = "rbxassetid://7743878857",
+    lock     = "rbxassetid://7733965118",
+    check    = "rbxassetid://7733715400",
+    alert    = "rbxassetid://7733658504",
+    info     = "rbxassetid://7733964719",
+    folder   = "rbxassetid://7733799185",
+    save     = "rbxassetid://7734052335",
+    trash    = "rbxassetid://7743873772",
+    chevDown = "rbxassetid://7733717447",
+    externalLink = "rbxassetid://7743866903",
+    refreshCw = "rbxassetid://7734051052",
 }
-
-local function setTheme(name)
-    local t = Themes[name] or Themes.Purple
-    C.Accent = t.Accent
-    C.AccentHover = t.AccentHover
-    C.AccentSoft = t.AccentSoft
-    C.Logo = t.Logo
-end
 
 -- ============================================
 -- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 -- ============================================
 local function new(class, props)
     local o = Instance.new(class)
-    if props then for k, v in pairs(props) do if k ~= "Parent" then o[k] = v end end
-        if props.Parent then o.Parent = props.Parent end end
+    if props then
+        for k, v in pairs(props) do
+            if k ~= "Parent" then o[k] = v end
+        end
+        if props.Parent then o.Parent = props.Parent end
+    end
     return o
 end
 
-local function corner(p, r) local c = Instance.new("UICorner"); c.CornerRadius = UDim.new(0, r or 8); c.Parent = p; return c end
+local function corner(p, r)
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, r or 8)
+    c.Parent = p
+    return c
+end
+
 local function ustroke(p, col, t, tr)
     local s = Instance.new("UIStroke")
-    s.Color = col or C.Border; s.Thickness = t or 1; s.Transparency = tr or 0
+    s.Color = col or C.Border
+    s.Thickness = t or 1
+    s.Transparency = tr or 0
     s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     s.Parent = p
     return s
 end
 
-local Icons = {
-    search       = "rbxassetid://7734052925",
-    folder       = "rbxassetid://7733799185",
-    chevDown     = "rbxassetid://7733717447",
-    target       = "rbxassetid://7743872758",
-    eye          = "rbxassetid://7733774602",
-    globe        = "rbxassetid://7733954760",
-    zap          = "rbxassetid://7733771628",
-    settings     = "rbxassetid://7734053495",
-    minimize     = "rbxassetid://7733997870",
-    close        = "rbxassetid://7743878857",
-    lock         = "rbxassetid://7733965118",
-    alert        = "rbxassetid://7733658504",
-    check        = "rbxassetid://7733715400",
-    info         = "rbxassetid://7733964719",
-    cpu          = "rbxassetid://7733765045",
-    shield       = "rbxassetid://7734056608",
-    externalLink = "rbxassetid://7743866903",
-    flame        = "rbxassetid://7733798747",
-    home         = "rbxassetid://7743872758",
-    save         = "rbxassetid://7734052335",
-    trash        = "rbxassetid://7743873772",
-    refreshCw    = "rbxassetid://7734051052",
-    copy         = "rbxassetid://7733764083",
-    sliders      = "rbxassetid://7743875962",
-}
-
 -- ============================================
--- KEY SYSTEM (HWID + Junkie)
+-- КЛЮЧ-СИСТЕМА
 -- ============================================
 local hasFS = (typeof(writefile) == "function") and (typeof(readfile) == "function")
 local FOLDER = "fracture"
 if hasFS and not isfolder(FOLDER) then pcall(makefolder, FOLDER) end
 
-local KEY_FILE  = FOLDER .. "/key.dat"
+local KEY_FILE = FOLDER .. "/key.dat"
 local HWID_FILE = FOLDER .. "/hwid.dat"
-local LANG_FILE = FOLDER .. "/lang.dat"
 
-local function saveKey(k)  pcall(function() if hasFS then writefile(KEY_FILE, k) end end) end
-local function loadKey()   if hasFS and isfile(KEY_FILE) then local ok,c=pcall(readfile,KEY_FILE); return ok and c or nil end end
+local function saveKey(k) pcall(function() if hasFS then writefile(KEY_FILE, k) end end) end
+local function loadKey() if hasFS and isfile(KEY_FILE) then local ok,c=pcall(readfile,KEY_FILE); return ok and c or nil end end
 local function saveHWID(h) pcall(function() if hasFS then writefile(HWID_FILE, h) end end) end
-local function loadHWID()  if hasFS and isfile(HWID_FILE) then local ok,c=pcall(readfile,HWID_FILE); return ok and c or nil end end
+local function loadHWID() if hasFS and isfile(HWID_FILE) then local ok,c=pcall(readfile,HWID_FILE); return ok and c or nil end end
 local function getRealHWID()
     local h
     pcall(function() h = game:GetService("RbxAnalyticsService"):GetClientId() end)
@@ -151,9 +132,9 @@ do
     end)
     if ok and lib and type(lib) == "table" and lib.check_key then
         Junkie = lib
-        Junkie.service    = "linkvertise"
+        Junkie.service = "linkvertise"
         Junkie.identifier = "1036846"
-        Junkie.provider   = "linkvertise"
+        Junkie.provider = "linkvertise"
     else
         Junkie = {
             check_key = function(k) if k and #k > 0 then return {valid = true} end; return {valid = false} end,
@@ -163,48 +144,7 @@ do
     end
 end
 
-local currentLang = "English"
-local function saveLanguage(lang) if hasFS then pcall(writefile, LANG_FILE, lang) end end
-local function loadLanguage()
-    if hasFS and isfile(LANG_FILE) then
-        local ok, c = pcall(readfile, LANG_FILE)
-        if ok and (c == "English" or c == "Russian") then currentLang = c end
-    end
-end
-
-local TX = {
-    en = {
-        chooseLang     = "Choose Language",      english       = "English",
-        russian        = "Русский",               continue      = "Continue",
-        keySysTitle    = "KEY SYSTEM",            enterKey      = "Enter your key to continue",
-        keyPlaceholder = "Paste your key here...",verify        = "VERIFY",
-        verifying      = "Verifying...",          keyValid      = "KEY VALID",
-        invalidKey     = "INVALID KEY",           getKey        = "GET KEY",
-        linkCopied     = "Link copied!",          failedLink    = "Failed to get key link",
-        emptyKey       = "Please enter a key",    ourSocials    = "OUR SOCIALS",
-        telegram       = "Telegram",              discord       = "Discord",
-        iUnderstand    = "CONTINUE",
-    },
-    ru = {
-        chooseLang     = "Выбор языка",           english       = "English",
-        russian        = "Русский",               continue      = "Продолжить",
-        keySysTitle    = "СИСТЕМА КЛЮЧЕЙ",        enterKey      = "Введите ключ для входа",
-        keyPlaceholder = "Вставьте ключ сюда...", verify        = "ПРОВЕРИТЬ",
-        verifying      = "Проверка...",           keyValid      = "КЛЮЧ ПРИНЯТ",
-        invalidKey     = "НЕВЕРНЫЙ КЛЮЧ",         getKey        = "ПОЛУЧИТЬ КЛЮЧ",
-        linkCopied     = "Ссылка скопирована!",   failedLink    = "Не удалось получить ссылку",
-        emptyKey       = "Введите ключ",          ourSocials    = "НАШИ СОЦСЕТИ",
-        telegram       = "Telegram",              discord       = "Discord",
-        iUnderstand    = "ПРОДОЛЖИТЬ",
-    },
-}
-local function tx(k)
-    local lang = currentLang == "Russian" and TX.ru or TX.en
-    return lang[k] or TX.en[k] or k
-end
-
 local function showKeySystem(callback)
-    loadLanguage()
     local saved = loadKey()
     if saved and saved ~= "" then
         if checkHWID(saved) then
@@ -212,136 +152,306 @@ local function showKeySystem(callback)
             if ok and res and res.valid then
                 if callback then callback() end
                 return
-            else
-                pcall(function() if hasFS and isfile(KEY_FILE) then pcall(delfile, KEY_FILE) end end)
-                pcall(function() if hasFS and isfile(HWID_FILE) then pcall(delfile, HWID_FILE) end end)
             end
         end
     end
 
-    -- GUI key system
     local gui = new("ScreenGui", {
-        Name = "FractureKeySystem", Parent = UI_PARENT,
-        ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-        DisplayOrder = 99999, IgnoreGuiInset = true,
+        Name = "FractureKeySystem",
+        Parent = UI_PARENT,
+        ResetOnSpawn = false,
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+        DisplayOrder = 99999,
+        IgnoreGuiInset = true,
     })
+
     local overlay = new("Frame", {
-        Parent = gui, Size = UDim2.fromScale(1,1),
-        BackgroundColor3 = Color3.new(0,0,0), BackgroundTransparency = 1, ZIndex = 1,
+        Parent = gui,
+        Size = UDim2.fromScale(1, 1),
+        BackgroundColor3 = Color3.new(0, 0, 0),
+        BackgroundTransparency = 1,
+        ZIndex = 1,
     })
     TweenService:Create(overlay, TweenInfo.new(0.25), {BackgroundTransparency = 0.6}):Play()
 
     local Main = new("Frame", {
-        Parent = overlay, Size = UDim2.fromOffset(0, 0),
+        Parent = overlay,
+        Size = UDim2.fromOffset(0, 0),
         Position = UDim2.new(0.5, 0, 0.5, 0),
-        BackgroundColor3 = C.Bg, BorderSizePixel = 0,
-        ZIndex = 2, ClipsDescendants = true,
+        BackgroundColor3 = C.Bg,
+        BorderSizePixel = 0,
+        ZIndex = 2,
+        ClipsDescendants = true,
     })
-    corner(Main, 16); ustroke(Main, C.BorderBrt, 1, 0.4)
+    corner(Main, 16)
+    ustroke(Main, C.BorderBrt, 1, 0.4)
 
-    -- Title
-    local TB = new("Frame", {Parent = Main, Size = UDim2.new(1, 0, 0, 50), BackgroundColor3 = C.Panel, BorderSizePixel = 0, ZIndex = 3})
+    -- Заголовок
+    local TB = new("Frame", {
+        Parent = Main,
+        Size = UDim2.new(1, 0, 0, 50),
+        BackgroundColor3 = C.Panel,
+        BorderSizePixel = 0,
+        ZIndex = 3,
+    })
     corner(TB, 16)
-    new("TextLabel", {Parent = TB, Size = UDim2.fromOffset(40, 40), Position = UDim2.fromOffset(15, 5), BackgroundTransparency = 1,
-        Text = "FR", TextColor3 = C.Logo, TextSize = 22, Font = Enum.Font.GothamBlack, ZIndex = 4})
-    new("TextLabel", {Parent = TB, Size = UDim2.new(1, -130, 0, 40), Position = UDim2.fromOffset(60, 5), BackgroundTransparency = 1,
-        Text = tx("keySysTitle"), TextColor3 = C.Text, TextSize = 14, Font = Enum.Font.GothamBold,
-        TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center, ZIndex = 4})
+    new("TextLabel", {
+        Parent = TB,
+        Size = UDim2.fromOffset(40, 40),
+        Position = UDim2.fromOffset(15, 5),
+        BackgroundTransparency = 1,
+        Text = "FR",
+        TextColor3 = C.Logo,
+        TextSize = 22,
+        Font = Enum.Font.GothamBlack,
+        ZIndex = 4,
+    })
+    new("TextLabel", {
+        Parent = TB,
+        Size = UDim2.new(1, -130, 0, 40),
+        Position = UDim2.fromOffset(60, 5),
+        BackgroundTransparency = 1,
+        Text = "KEY SYSTEM",
+        TextColor3 = C.Text,
+        TextSize = 14,
+        Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Center,
+        ZIndex = 4,
+    })
 
-    -- Lock icon
-    local lockBox = new("Frame", {Parent = Main, Size = UDim2.fromOffset(78, 78), Position = UDim2.new(0.5, -39, 0, 70),
-        BackgroundColor3 = C.PanelInner, BorderSizePixel = 0, ZIndex = 3})
-    corner(lockBox, 18); ustroke(lockBox, C.Accent, 1, 0.4)
-    new("ImageLabel", {Parent = lockBox, Size = UDim2.fromOffset(44, 44), Position = UDim2.fromOffset(17, 17),
-        BackgroundTransparency = 1, Image = Icons.lock, ImageColor3 = C.Logo, ZIndex = 4})
+    -- Lock
+    local lockBox = new("Frame", {
+        Parent = Main,
+        Size = UDim2.fromOffset(78, 78),
+        Position = UDim2.new(0.5, -39, 0, 70),
+        BackgroundColor3 = C.PanelInner,
+        BorderSizePixel = 0,
+        ZIndex = 3,
+    })
+    corner(lockBox, 18)
+    ustroke(lockBox, C.Accent, 1, 0.4)
+    new("ImageLabel", {
+        Parent = lockBox,
+        Size = UDim2.fromOffset(44, 44),
+        Position = UDim2.fromOffset(17, 17),
+        BackgroundTransparency = 1,
+        Image = Icons.lock,
+        ImageColor3 = C.Logo,
+        ZIndex = 4,
+    })
 
-    new("TextLabel", {Parent = Main, Size = UDim2.new(1, -40, 0, 18), Position = UDim2.fromOffset(20, 160), BackgroundTransparency = 1,
-        Text = tx("enterKey"), TextColor3 = C.TextDim, TextSize = 13, Font = Enum.Font.Gotham, ZIndex = 3})
+    new("TextLabel", {
+        Parent = Main,
+        Size = UDim2.new(1, -40, 0, 18),
+        Position = UDim2.fromOffset(20, 160),
+        BackgroundTransparency = 1,
+        Text = "Enter your key to continue",
+        TextColor3 = C.TextDim,
+        TextSize = 13,
+        Font = Enum.Font.Gotham,
+        ZIndex = 3,
+    })
 
-    local KeyBoxFrame = new("Frame", {Parent = Main, Size = UDim2.fromOffset(360, 42), Position = UDim2.new(0.5, -180, 0, 190),
-        BackgroundColor3 = C.PanelInner, BorderSizePixel = 0, ZIndex = 3})
+    local KeyBoxFrame = new("Frame", {
+        Parent = Main,
+        Size = UDim2.fromOffset(360, 42),
+        Position = UDim2.new(0.5, -180, 0, 190),
+        BackgroundColor3 = C.PanelInner,
+        BorderSizePixel = 0,
+        ZIndex = 3,
+    })
     corner(KeyBoxFrame, 10)
-    local keyStroke = ustroke(KeyBoxFrame, C.Border, 1, 0.5)
-    local KeyBox = new("TextBox", {Parent = KeyBoxFrame, Size = UDim2.new(1, -20, 1, 0), Position = UDim2.fromOffset(15, 0),
-        BackgroundTransparency = 1, PlaceholderText = tx("keyPlaceholder"), PlaceholderColor3 = C.TextMuted,
-        TextColor3 = C.Text, TextSize = 13, Font = Enum.Font.GothamMedium,
-        TextXAlignment = Enum.TextXAlignment.Left, ClearTextOnFocus = false, Text = "", ZIndex = 4})
-    KeyBox.Focused:Connect(function() TweenService:Create(keyStroke, TweenInfo.new(0.15), {Color = C.Accent, Transparency = 0.2}):Play() end)
-    KeyBox.FocusLost:Connect(function() TweenService:Create(keyStroke, TweenInfo.new(0.15), {Color = C.Border, Transparency = 0.5}):Play() end)
+    ustroke(KeyBoxFrame, C.Border, 1, 0.5)
+    local KeyBox = new("TextBox", {
+        Parent = KeyBoxFrame,
+        Size = UDim2.new(1, -20, 1, 0),
+        Position = UDim2.fromOffset(15, 0),
+        BackgroundTransparency = 1,
+        PlaceholderText = "Paste your key here...",
+        PlaceholderColor3 = C.TextMuted,
+        TextColor3 = C.Text,
+        TextSize = 13,
+        Font = Enum.Font.GothamMedium,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ClearTextOnFocus = false,
+        Text = "",
+        ZIndex = 4,
+    })
 
-    local VerifyBtn = new("TextButton", {Parent = Main, Size = UDim2.fromOffset(360, 42), Position = UDim2.new(0.5, -180, 0, 246),
-        BackgroundColor3 = C.Accent, BorderSizePixel = 0, Text = tx("verify"), TextColor3 = Color3.new(1,1,1),
-        TextSize = 14, Font = Enum.Font.GothamBold, AutoButtonColor = false, ZIndex = 3})
+    local VerifyBtn = new("TextButton", {
+        Parent = Main,
+        Size = UDim2.fromOffset(360, 42),
+        Position = UDim2.new(0.5, -180, 0, 246),
+        BackgroundColor3 = C.Accent,
+        BorderSizePixel = 0,
+        Text = "VERIFY",
+        TextColor3 = Color3.new(1, 1, 1),
+        TextSize = 14,
+        Font = Enum.Font.GothamBold,
+        AutoButtonColor = false,
+        ZIndex = 3,
+    })
     corner(VerifyBtn, 10)
-    VerifyBtn.MouseEnter:Connect(function() TweenService:Create(VerifyBtn, TweenInfo.new(0.15), {BackgroundColor3 = C.AccentHover}):Play() end)
-    VerifyBtn.MouseLeave:Connect(function() TweenService:Create(VerifyBtn, TweenInfo.new(0.15), {BackgroundColor3 = C.Accent}):Play() end)
+    VerifyBtn.MouseEnter:Connect(function()
+        TweenService:Create(VerifyBtn, TweenInfo.new(0.15), {BackgroundColor3 = C.AccentHover}):Play()
+    end)
+    VerifyBtn.MouseLeave:Connect(function()
+        TweenService:Create(VerifyBtn, TweenInfo.new(0.15), {BackgroundColor3 = C.Accent}):Play()
+    end)
 
-    local GetKeyBtn = new("TextButton", {Parent = Main, Size = UDim2.fromOffset(360, 36), Position = UDim2.new(0.5, -180, 0, 298),
-        BackgroundColor3 = C.PanelInner, BorderSizePixel = 0, Text = "", AutoButtonColor = false, ZIndex = 3})
-    corner(GetKeyBtn, 10); ustroke(GetKeyBtn, C.BorderBrt, 1, 0.4)
-    new("UIListLayout", {Parent = GetKeyBtn, FillDirection = Enum.FillDirection.Horizontal,
-        HorizontalAlignment = Enum.HorizontalAlignment.Center, VerticalAlignment = Enum.VerticalAlignment.Center, Padding = UDim.new(0, 8)})
-    new("ImageLabel", {Parent = GetKeyBtn, Size = UDim2.fromOffset(14, 14), BackgroundTransparency = 1, Image = Icons.externalLink, ImageColor3 = C.Text, ZIndex = 4, LayoutOrder = 1})
-    new("TextLabel", {Parent = GetKeyBtn, Size = UDim2.fromOffset(0, 0), AutomaticSize = Enum.AutomaticSize.X,
-        BackgroundTransparency = 1, Text = tx("getKey"), TextColor3 = C.Text, TextSize = 13, Font = Enum.Font.GothamBold, ZIndex = 4, LayoutOrder = 2})
-    GetKeyBtn.MouseEnter:Connect(function() TweenService:Create(GetKeyBtn, TweenInfo.new(0.15), {BackgroundColor3 = C.PanelHover}):Play() end)
-    GetKeyBtn.MouseLeave:Connect(function() TweenService:Create(GetKeyBtn, TweenInfo.new(0.15), {BackgroundColor3 = C.PanelInner}):Play() end)
+    local GetKeyBtn = new("TextButton", {
+        Parent = Main,
+        Size = UDim2.fromOffset(360, 36),
+        Position = UDim2.new(0.5, -180, 0, 298),
+        BackgroundColor3 = C.PanelInner,
+        BorderSizePixel = 0,
+        Text = "",
+        AutoButtonColor = false,
+        ZIndex = 3,
+    })
+    corner(GetKeyBtn, 10)
+    ustroke(GetKeyBtn, C.BorderBrt, 1, 0.4)
+    new("UIListLayout", {
+        Parent = GetKeyBtn,
+        FillDirection = Enum.FillDirection.Horizontal,
+        HorizontalAlignment = Enum.HorizontalAlignment.Center,
+        VerticalAlignment = Enum.VerticalAlignment.Center,
+        Padding = UDim.new(0, 8),
+    })
+    new("ImageLabel", {
+        Parent = GetKeyBtn,
+        Size = UDim2.fromOffset(14, 14),
+        BackgroundTransparency = 1,
+        Image = Icons.externalLink,
+        ImageColor3 = C.Text,
+        ZIndex = 4,
+        LayoutOrder = 1,
+    })
+    new("TextLabel", {
+        Parent = GetKeyBtn,
+        Size = UDim2.fromOffset(0, 0),
+        AutomaticSize = Enum.AutomaticSize.X,
+        BackgroundTransparency = 1,
+        Text = "GET KEY",
+        TextColor3 = C.Text,
+        TextSize = 13,
+        Font = Enum.Font.GothamBold,
+        ZIndex = 4,
+        LayoutOrder = 2,
+    })
 
-    local StatusLabel = new("TextLabel", {Parent = Main, Size = UDim2.new(1, -40, 0, 20), Position = UDim2.fromOffset(20, 344),
-        BackgroundTransparency = 1, Text = "", TextColor3 = C.TextDim, TextSize = 12, Font = Enum.Font.GothamMedium,
-        TextXAlignment = Enum.TextXAlignment.Center, ZIndex = 3})
+    local StatusLabel = new("TextLabel", {
+        Parent = Main,
+        Size = UDim2.new(1, -40, 0, 20),
+        Position = UDim2.fromOffset(20, 344),
+        BackgroundTransparency = 1,
+        Text = "",
+        TextColor3 = C.TextDim,
+        TextSize = 12,
+        Font = Enum.Font.GothamMedium,
+        TextXAlignment = Enum.TextXAlignment.Center,
+        ZIndex = 3,
+    })
 
-    new("TextLabel", {Parent = Main, Size = UDim2.new(1, -40, 0, 14), Position = UDim2.fromOffset(20, 372),
-        BackgroundTransparency = 1, Text = tx("ourSocials"), TextColor3 = C.TextMuted, TextSize = 10,
-        Font = Enum.Font.GothamBold, TextXAlignment = Enum.TextXAlignment.Center, ZIndex = 3})
+    new("TextLabel", {
+        Parent = Main,
+        Size = UDim2.new(1, -40, 0, 14),
+        Position = UDim2.fromOffset(20, 372),
+        BackgroundTransparency = 1,
+        Text = "OUR SOCIALS",
+        TextColor3 = C.TextMuted,
+        TextSize = 10,
+        Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Center,
+        ZIndex = 3,
+    })
 
-    local socialsRow = new("Frame", {Parent = Main, Size = UDim2.fromOffset(360, 32), Position = UDim2.new(0.5, -180, 0, 410),
-        BackgroundTransparency = 1, ZIndex = 3})
-    new("UIListLayout", {Parent = socialsRow, FillDirection = Enum.FillDirection.Horizontal,
-        HorizontalAlignment = Enum.HorizontalAlignment.Center, VerticalAlignment = Enum.VerticalAlignment.Center, Padding = UDim.new(0, 12)})
+    local socialsRow = new("Frame", {
+        Parent = Main,
+        Size = UDim2.fromOffset(360, 32),
+        Position = UDim2.new(0.5, -180, 0, 410),
+        BackgroundTransparency = 1,
+        ZIndex = 3,
+    })
+    new("UIListLayout", {
+        Parent = socialsRow,
+        FillDirection = Enum.FillDirection.Horizontal,
+        HorizontalAlignment = Enum.HorizontalAlignment.Center,
+        VerticalAlignment = Enum.VerticalAlignment.Center,
+        Padding = UDim.new(0, 12),
+    })
+
     local function makeSocial(label, color, link)
-        local b = new("TextButton", {Parent = socialsRow, Size = UDim2.fromOffset(170, 32),
-            BackgroundColor3 = color, BackgroundTransparency = 0.85, BorderSizePixel = 0, Text = "",
-            AutoButtonColor = false, ZIndex = 3})
-        corner(b, 8); ustroke(b, color, 1, 0.5)
-        new("TextLabel", {Parent = b, Size = UDim2.fromScale(1,1), BackgroundTransparency = 1, Text = label,
-            TextColor3 = color, TextSize = 12, Font = Enum.Font.GothamBold, ZIndex = 4})
-        b.MouseEnter:Connect(function() TweenService:Create(b, TweenInfo.new(0.15), {BackgroundTransparency = 0.7}):Play() end)
-        b.MouseLeave:Connect(function() TweenService:Create(b, TweenInfo.new(0.15), {BackgroundTransparency = 0.85}):Play() end)
+        local b = new("TextButton", {
+            Parent = socialsRow,
+            Size = UDim2.fromOffset(170, 32),
+            BackgroundColor3 = color,
+            BackgroundTransparency = 0.85,
+            BorderSizePixel = 0,
+            Text = "",
+            AutoButtonColor = false,
+            ZIndex = 3,
+        })
+        corner(b, 8)
+        ustroke(b, color, 1, 0.5)
+        new("TextLabel", {
+            Parent = b,
+            Size = UDim2.fromScale(1, 1),
+            BackgroundTransparency = 1,
+            Text = label,
+            TextColor3 = color,
+            TextSize = 12,
+            Font = Enum.Font.GothamBold,
+            ZIndex = 4,
+        })
+        b.MouseEnter:Connect(function()
+            TweenService:Create(b, TweenInfo.new(0.15), {BackgroundTransparency = 0.7}):Play()
+        end)
+        b.MouseLeave:Connect(function()
+            TweenService:Create(b, TweenInfo.new(0.15), {BackgroundTransparency = 0.85}):Play()
+        end)
         b.MouseButton1Click:Connect(function()
-            pcall(function() if setclipboard then setclipboard(link) end end)
-            local origColor = b.BackgroundColor3
-            b.BackgroundColor3 = C.Success
-            b.BackgroundTransparency = 0.5
-            task.delay(0.25, function()
-                if b.Parent then TweenService:Create(b, TweenInfo.new(0.3), {BackgroundColor3 = origColor, BackgroundTransparency = 0.85}):Play() end
+            pcall(function()
+                if setclipboard then setclipboard(link) end
             end)
         end)
         return b
     end
-    makeSocial(tx("telegram"), C.Telegram, "https://t.me/erafox")
-    makeSocial(tx("discord"),  C.Discord,  "https://discord.gg/fracture")
+    makeSocial("Telegram", C.Telegram or Color3.fromRGB(42, 171, 238), "https://t.me/erafox")
+    makeSocial("Discord", C.Discord or Color3.fromRGB(88, 101, 242), "https://discord.gg/fracture")
 
     local verifying = false
     local function doVerify()
         if verifying then return end
         local k = KeyBox.Text:gsub("%s+", "")
-        if k == "" then StatusLabel.Text = tx("emptyKey"); StatusLabel.TextColor3 = C.Warning; return end
+        if k == "" then
+            StatusLabel.Text = "Please enter a key"
+            StatusLabel.TextColor3 = C.Warning
+            return
+        end
         verifying = true
-        StatusLabel.Text = tx("verifying"); StatusLabel.TextColor3 = C.Warning
+        StatusLabel.Text = "Verifying..."
+        StatusLabel.TextColor3 = C.Warning
         task.spawn(function()
             local ok, res = pcall(Junkie.check_key, k)
             if ok and res and res.valid then
                 setHWID(k)
-                StatusLabel.Text = tx("keyValid"); StatusLabel.TextColor3 = C.Success
+                StatusLabel.Text = "KEY VALID"
+                StatusLabel.TextColor3 = C.Success
                 TweenService:Create(VerifyBtn, TweenInfo.new(0.3), {BackgroundColor3 = C.Success}):Play()
                 task.wait(0.8)
                 TweenService:Create(overlay, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-                TweenService:Create(Main, TweenInfo.new(0.3), {Size = UDim2.fromOffset(0,0), Position = UDim2.new(0.5,0,0.5,0)}):Play()
-                task.wait(0.3); gui:Destroy()
+                TweenService:Create(Main, TweenInfo.new(0.3), {
+                    Size = UDim2.fromOffset(0, 0),
+                    Position = UDim2.new(0.5, 0, 0.5, 0),
+                }):Play()
+                task.wait(0.3)
+                gui:Destroy()
                 if callback then callback() end
             else
-                StatusLabel.Text = tx("invalidKey"); StatusLabel.TextColor3 = C.Danger
+                StatusLabel.Text = "INVALID KEY"
+                StatusLabel.TextColor3 = C.Danger
                 TweenService:Create(VerifyBtn, TweenInfo.new(0.2), {BackgroundColor3 = C.Danger}):Play()
                 task.wait(0.4)
                 TweenService:Create(VerifyBtn, TweenInfo.new(0.2), {BackgroundColor3 = C.Accent}):Play()
@@ -349,15 +459,32 @@ local function showKeySystem(callback)
             end
         end)
     end
+
     VerifyBtn.MouseButton1Click:Connect(doVerify)
-    KeyBox.FocusLost:Connect(function(enter) if enter then doVerify() end end)
+    KeyBox.FocusLost:Connect(function(enter)
+        if enter then doVerify() end
+    end)
+
     GetKeyBtn.MouseButton1Click:Connect(function()
-        if Junkie.__fallback then StatusLabel.Text = "Junkie SDK unavailable"; StatusLabel.TextColor3 = C.Warning; return end
+        if Junkie.__fallback then
+            StatusLabel.Text = "Junkie SDK unavailable"
+            StatusLabel.TextColor3 = C.Warning
+            return
+        end
         local link
-        local ok = pcall(function() link = Junkie.get_key_link() end)
-        if ok and link then pcall(function() if setclipboard then setclipboard(link) end end)
-            StatusLabel.Text = tx("linkCopied"); StatusLabel.TextColor3 = C.Success
-        else StatusLabel.Text = tx("failedLink"); StatusLabel.TextColor3 = C.Danger end
+        local ok = pcall(function()
+            link = Junkie.get_key_link()
+        end)
+        if ok and link then
+            pcall(function()
+                if setclipboard then setclipboard(link) end
+            end)
+            StatusLabel.Text = "Link copied!"
+            StatusLabel.TextColor3 = C.Success
+        else
+            StatusLabel.Text = "Failed to get link"
+            StatusLabel.TextColor3 = C.Danger
+        end
     end)
 
     TweenService:Create(Main, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
@@ -391,7 +518,7 @@ local function notify(text, kind, duration, force)
     duration = duration or 2.8
     local color = (kind == "success" and C.Success) or (kind == "error" and C.Danger)
                 or (kind == "warning" and C.Warning) or C.Info
-    local icon  = (kind == "success" and Icons.check) or (kind == "error" and Icons.close)
+    local icon = (kind == "success" and Icons.check) or (kind == "error" and Icons.close)
                 or (kind == "warning" and Icons.alert) or Icons.info
 
     local idx = #activeNotifs
@@ -402,10 +529,12 @@ local function notify(text, kind, duration, force)
 
     local notif = new("Frame", {
         Parent = NotificationsGui,
-        BackgroundColor3 = C.Panel, BorderSizePixel = 0,
+        BackgroundColor3 = C.Panel,
+        BorderSizePixel = 0,
         Size = UDim2.fromOffset(notifW, notifH),
         Position = UDim2.new(1, notifW + 30, 0, YPos),
-        ZIndex = 1000, ClipsDescendants = false,
+        ZIndex = 1000,
+        ClipsDescendants = false,
         BackgroundTransparency = 0.05,
     })
     corner(notif, 10)
@@ -413,22 +542,33 @@ local function notify(text, kind, duration, force)
     table.insert(activeNotifs, notif)
 
     local iconBox = new("Frame", {
-        Parent = notif, Size = UDim2.fromOffset(36, 36),
+        Parent = notif,
+        Size = UDim2.fromOffset(36, 36),
         Position = UDim2.fromOffset(10, 10),
-        BackgroundColor3 = color, BackgroundTransparency = 0.82,
-        BorderSizePixel = 0, ZIndex = 1001,
+        BackgroundColor3 = color,
+        BackgroundTransparency = 0.82,
+        BorderSizePixel = 0,
+        ZIndex = 1001,
     })
     corner(iconBox, 8)
     ustroke(iconBox, color, 1, 0.55)
     new("ImageLabel", {
-        Parent = iconBox, Size = UDim2.fromOffset(18, 18),
+        Parent = iconBox,
+        Size = UDim2.fromOffset(18, 18),
         Position = UDim2.fromOffset(9, 9),
-        BackgroundTransparency = 1, Image = icon, ImageColor3 = color, ZIndex = 1002,
+        BackgroundTransparency = 1,
+        Image = icon,
+        ImageColor3 = color,
+        ZIndex = 1002,
     })
     local txt = new("TextLabel", {
-        Parent = notif, Size = UDim2.new(1, -60, 1, -10),
-        Position = UDim2.fromOffset(54, 5), BackgroundTransparency = 1,
-        Text = text, TextColor3 = C.Text, TextSize = 13,
+        Parent = notif,
+        Size = UDim2.new(1, -60, 1, -10),
+        Position = UDim2.fromOffset(54, 5),
+        BackgroundTransparency = 1,
+        Text = text,
+        TextColor3 = C.Text,
+        TextSize = 13,
         Font = Enum.Font.GothamMedium,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextYAlignment = Enum.TextYAlignment.Center,
@@ -437,15 +577,21 @@ local function notify(text, kind, duration, force)
         ZIndex = 1001,
     })
     local pbarBg = new("Frame", {
-        Parent = notif, Size = UDim2.new(1, -20, 0, 2),
+        Parent = notif,
+        Size = UDim2.new(1, -20, 0, 2),
         Position = UDim2.new(0, 10, 1, -6),
-        BackgroundColor3 = C.PanelInner, BackgroundTransparency = 0.3,
-        BorderSizePixel = 0, ZIndex = 1001,
+        BackgroundColor3 = C.PanelInner,
+        BackgroundTransparency = 0.3,
+        BorderSizePixel = 0,
+        ZIndex = 1001,
     })
     corner(pbarBg, 999)
     local pbar = new("Frame", {
-        Parent = pbarBg, Size = UDim2.fromScale(1, 1),
-        BackgroundColor3 = color, BorderSizePixel = 0, ZIndex = 1002,
+        Parent = pbarBg,
+        Size = UDim2.fromScale(1, 1),
+        BackgroundColor3 = color,
+        BorderSizePixel = 0,
+        ZIndex = 1002,
     })
     corner(pbar, 999)
 
@@ -480,16 +626,15 @@ local function notify(text, kind, duration, force)
 end
 
 -- ============================================
--- ГЛАВНАЯ ФУНКЦИЯ СОЗДАНИЯ GUI
+=== ГЛАВНАЯ ФУНКЦИЯ СОЗДАНИЯ GUI
 -- ============================================
 function FractureUI:CreateWindow(config)
     config = config or {}
     local title = config.title or "Fracture"
     local version = config.version or "v1.0"
-    local bindKey = config.bindKey or Enum.KeyCode.RightShift
+    local bindKey = config.bindKey or Enum.KeyCode.G
     local theme = config.theme or "Purple"
-    
-    setTheme(theme)
+
     ensureNotifGui()
 
     -- Очищаем старые GUI
@@ -501,86 +646,120 @@ function FractureUI:CreateWindow(config)
     end
 
     local ScreenGui = new("ScreenGui", {
-        Name = "FractureUI", Parent = UI_PARENT,
-        ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-        IgnoreGuiInset = true, DisplayOrder = 99000,
+        Name = "FractureUI",
+        Parent = UI_PARENT,
+        ResetOnSpawn = false,
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+        IgnoreGuiInset = true,
+        DisplayOrder = 99000,
     })
 
     local OverlayGui = new("ScreenGui", {
-        Name = "FractureOverlay", Parent = UI_PARENT,
-        ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-        IgnoreGuiInset = true, DisplayOrder = 99100,
+        Name = "FractureOverlay",
+        Parent = UI_PARENT,
+        ResetOnSpawn = false,
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+        IgnoreGuiInset = true,
+        DisplayOrder = 99100,
     })
 
     -- Основное окно
     local Main = new("Frame", {
-        Parent = ScreenGui, Name = "Main",
+        Parent = ScreenGui,
+        Name = "Main",
         Size = UDim2.fromOffset(890, 555),
         Position = UDim2.new(0.5, -445, 0.5, -277),
-        BackgroundColor3 = C.Bg, BorderSizePixel = 0,
+        BackgroundColor3 = C.Bg,
+        BorderSizePixel = 0,
     })
-    corner(Main, 14); ustroke(Main, C.Border, 1, 0.4)
+    corner(Main, 14)
+    ustroke(Main, C.Border, 1, 0.4)
 
     -- Sidebar
     local Sidebar = new("Frame", {
-        Parent = Main, Name = "Sidebar",
+        Parent = Main,
+        Name = "Sidebar",
         Size = UDim2.new(0, 60, 1, 0),
-        BackgroundColor3 = C.Sidebar, BorderSizePixel = 0,
+        BackgroundColor3 = C.Sidebar,
+        BorderSizePixel = 0,
     })
     corner(Sidebar, 14)
-    new("Frame", {
-        Parent = Sidebar, Size = UDim2.new(0, 14, 1, 0),
-        Position = UDim2.new(1, -14, 0, 0),
-        BackgroundColor3 = C.Sidebar, BorderSizePixel = 0,
-    })
 
     -- Logo
     new("TextLabel", {
-        Parent = Sidebar, Size = UDim2.fromOffset(40, 40),
-        Position = UDim2.fromOffset(10, 14), BackgroundTransparency = 1,
-        Text = "FR", TextColor3 = C.Logo,
-        TextSize = 22, Font = Enum.Font.GothamBlack,
+        Parent = Sidebar,
+        Size = UDim2.fromOffset(40, 40),
+        Position = UDim2.fromOffset(10, 14),
+        BackgroundTransparency = 1,
+        Text = "FR",
+        TextColor3 = C.Logo,
+        TextSize = 22,
+        Font = Enum.Font.GothamBlack,
     })
 
     -- Top Bar
     local TopBar = new("Frame", {
-        Parent = Main, Size = UDim2.new(1, -80, 0, 50),
-        Position = UDim2.fromOffset(70, 12), BackgroundTransparency = 1,
+        Parent = Main,
+        Size = UDim2.new(1, -80, 0, 50),
+        Position = UDim2.fromOffset(70, 12),
+        BackgroundTransparency = 1,
     })
 
+    -- Кнопка закрытия
     local CloseBtn = new("TextButton", {
-        Parent = TopBar, Size = UDim2.fromOffset(32, 32),
+        Parent = TopBar,
+        Size = UDim2.fromOffset(32, 32),
         Position = UDim2.new(1, -36, 0, 4),
-        BackgroundColor3 = C.Panel, BorderSizePixel = 0,
-        AutoButtonColor = false, Text = "",
+        BackgroundColor3 = C.Panel,
+        BorderSizePixel = 0,
+        AutoButtonColor = false,
+        Text = "",
     })
     corner(CloseBtn, 8)
-    new("ImageLabel", {Parent = CloseBtn, Size = UDim2.fromOffset(16,16),
-        Position = UDim2.fromOffset(8,8), BackgroundTransparency = 1,
-        Image = Icons.close, ImageColor3 = C.TextDim})
+    new("ImageLabel", {
+        Parent = CloseBtn,
+        Size = UDim2.fromOffset(16, 16),
+        Position = UDim2.fromOffset(8, 8),
+        BackgroundTransparency = 1,
+        Image = Icons.close,
+        ImageColor3 = C.TextDim,
+    })
 
+    -- Кнопка сворачивания
     local MinBtn = new("TextButton", {
-        Parent = TopBar, Size = UDim2.fromOffset(32, 32),
+        Parent = TopBar,
+        Size = UDim2.fromOffset(32, 32),
         Position = UDim2.new(1, -72, 0, 4),
-        BackgroundColor3 = C.Panel, BorderSizePixel = 0,
-        AutoButtonColor = false, Text = "",
+        BackgroundColor3 = C.Panel,
+        BorderSizePixel = 0,
+        AutoButtonColor = false,
+        Text = "",
     })
     corner(MinBtn, 8)
-    new("ImageLabel", {Parent = MinBtn, Size = UDim2.fromOffset(16,16),
-        Position = UDim2.fromOffset(8,8), BackgroundTransparency = 1,
-        Image = Icons.minimize, ImageColor3 = C.TextDim})
+    new("ImageLabel", {
+        Parent = MinBtn,
+        Size = UDim2.fromOffset(16, 16),
+        Position = UDim2.fromOffset(8, 8),
+        BackgroundTransparency = 1,
+        Image = Icons.minimize,
+        ImageColor3 = C.TextDim,
+    })
 
-    -- Avatar
+    -- Avatar (иконка внизу сайдбара)
     local AvatarBox = new("Frame", {
-        Parent = Sidebar, Size = UDim2.fromOffset(40, 40),
+        Parent = Sidebar,
+        Size = UDim2.fromOffset(40, 40),
         Position = UDim2.new(0, 10, 1, -55),
-        BackgroundColor3 = C.PanelInner, BorderSizePixel = 0,
+        BackgroundColor3 = C.PanelInner,
+        BorderSizePixel = 0,
     })
     corner(AvatarBox, 999)
     ustroke(AvatarBox, C.Accent, 2, 0.3)
     local AvatarImg = new("ImageLabel", {
-        Parent = AvatarBox, Size = UDim2.fromScale(1, 1),
-        BackgroundTransparency = 1, Image = "",
+        Parent = AvatarBox,
+        Size = UDim2.fromScale(1, 1),
+        BackgroundTransparency = 1,
+        Image = "",
         ScaleType = Enum.ScaleType.Crop,
     })
     corner(AvatarImg, 999)
@@ -591,10 +770,12 @@ function FractureUI:CreateWindow(config)
         if ok and content then AvatarImg.Image = content end
     end)
 
-    -- Content
+    -- Content area
     local Content = new("Frame", {
-        Parent = Main, Size = UDim2.new(1, -80, 1, -80),
-        Position = UDim2.fromOffset(70, 70), BackgroundTransparency = 1,
+        Parent = Main,
+        Size = UDim2.new(1, -80, 1, -80),
+        Position = UDim2.fromOffset(70, 70),
+        BackgroundTransparency = 1,
     })
 
     -- ============================================
@@ -604,26 +785,32 @@ function FractureUI:CreateWindow(config)
     local CurrentTab = nil
 
     local tabDefs = {
-        {name = "1", icon = Icons.home, key = "tab1"},
-        {name = "2", icon = Icons.sliders, key = "tab2"},
-        {name = "3", icon = Icons.eye, key = "tab3"},
-        {name = "4", icon = Icons.flame, key = "tab4"},
-        {name = "5", icon = Icons.settings, key = "tab5"},
+        {name = "MAIN", icon = Icons.home, key = "tab1"},
+        {name = "PLAYER", icon = Icons.sliders, key = "tab2"},
+        {name = "VISUALS", icon = Icons.eye, key = "tab3"},
+        {name = "UTILS", icon = Icons.flame, key = "tab4"},
+        {name = "SETTINGS", icon = Icons.settings, key = "tab5"},
     }
 
     local function createSidebarBtn(idx, def)
         local btn = new("TextButton", {
-            Parent = Sidebar, Name = "Tab_" .. def.key,
+            Parent = Sidebar,
+            Name = "Tab_" .. def.key,
             Size = UDim2.fromOffset(40, 40),
-            Position = UDim2.fromOffset(10, 80 + (idx-1)*48),
-            BackgroundColor3 = C.PanelInner, BackgroundTransparency = 1,
-            Text = "", AutoButtonColor = false,
+            Position = UDim2.fromOffset(10, 80 + (idx - 1) * 48),
+            BackgroundColor3 = C.PanelInner,
+            BackgroundTransparency = 1,
+            Text = "",
+            AutoButtonColor = false,
         })
         corner(btn, 8)
         local img = new("ImageLabel", {
-            Parent = btn, Size = UDim2.fromOffset(20, 20),
+            Parent = btn,
+            Size = UDim2.fromOffset(20, 20),
             Position = UDim2.fromOffset(10, 10),
-            BackgroundTransparency = 1, Image = def.icon, ImageColor3 = C.TextDim,
+            BackgroundTransparency = 1,
+            Image = def.icon,
+            ImageColor3 = C.TextDim,
         })
         btn.MouseEnter:Connect(function()
             if CurrentTab ~= def.key then
@@ -639,17 +826,32 @@ function FractureUI:CreateWindow(config)
     end
 
     local function createTabContent()
-        local tab = new("Frame", {Parent = Content, Size = UDim2.fromScale(1,1), BackgroundTransparency = 1, Visible = false})
-        -- Добавляем UIListLayout для элементов, чтобы они не накладывались
-        local layout = new("UIListLayout", {Parent = tab, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 6)})
-        new("UIPadding", {Parent = tab, PaddingTop = UDim.new(0, 10), PaddingBottom = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)})
-        return tab, layout
+        local tab = new("Frame", {
+            Parent = Content,
+            Size = UDim2.fromScale(1, 1),
+            BackgroundTransparency = 1,
+            Visible = false,
+        })
+        new("UIPadding", {
+            Parent = tab,
+            PaddingTop = UDim.new(0, 10),
+            PaddingBottom = UDim.new(0, 10),
+            PaddingLeft = UDim.new(0, 10),
+            PaddingRight = UDim.new(0, 10),
+        })
+        return tab
     end
 
     for i, def in ipairs(tabDefs) do
         local btn, img = createSidebarBtn(i, def)
-        local content, layout = createTabContent()
-        Tabs[def.key] = {button = btn, image = img, content = content, layout = layout, key = def.key}
+        local content = createTabContent()
+        Tabs[def.key] = {
+            button = btn,
+            image = img,
+            content = content,
+            key = def.key,
+            name = def.name,
+        }
         btn.MouseButton1Click:Connect(function()
             for k, t in pairs(Tabs) do
                 t.content.Visible = (k == def.key)
@@ -669,45 +871,66 @@ function FractureUI:CreateWindow(config)
     CurrentTab = firstKey
 
     -- ============================================
-    -- ФУНКЦИИ ДЛЯ СОЗДАНИЯ ЭЛЕМЕНТОВ
+    -- ЭЛЕМЕНТЫ GUI
     -- ============================================
     local function createToggle(parent, label, default, callback)
         local row = new("Frame", {
             Parent = parent,
             Size = UDim2.new(1, 0, 0, 36),
             BackgroundTransparency = 1,
-            LayoutOrder = parent:GetChildren() and #parent:GetChildren() + 1 or 1,
         })
         new("TextLabel", {
-            Parent = row, Size = UDim2.new(1, -60, 1, 0),
-            BackgroundTransparency = 1, Text = label,
-            TextColor3 = C.TextDim, TextSize = 13, Font = Enum.Font.Gotham,
+            Parent = row,
+            Size = UDim2.new(1, -60, 1, 0),
+            BackgroundTransparency = 1,
+            Text = label,
+            TextColor3 = C.TextDim,
+            TextSize = 13,
+            Font = Enum.Font.Gotham,
             TextXAlignment = Enum.TextXAlignment.Left,
         })
         local frame = new("Frame", {
-            Parent = row, Size = UDim2.fromOffset(36, 20),
+            Parent = row,
+            Size = UDim2.fromOffset(36, 20),
             Position = UDim2.new(1, -36, 0.5, -10),
             BackgroundColor3 = default and C.Accent or C.PanelInner,
             BorderSizePixel = 0,
         })
         corner(frame, 999)
         local knob = new("Frame", {
-            Parent = frame, Size = UDim2.fromOffset(14, 14),
+            Parent = frame,
+            Size = UDim2.fromOffset(14, 14),
             Position = default and UDim2.fromOffset(19, 3) or UDim2.fromOffset(3, 3),
-            BackgroundColor3 = Color3.new(1,1,1), BorderSizePixel = 0,
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            BorderSizePixel = 0,
         })
         corner(knob, 999)
-        local btn = new("TextButton", {Parent = frame, Size = UDim2.fromScale(1,1), BackgroundTransparency = 1, Text = ""})
+        local btn = new("TextButton", {
+            Parent = frame,
+            Size = UDim2.fromScale(1, 1),
+            BackgroundTransparency = 1,
+            Text = "",
+        })
         local state = default or false
         local function setState(v)
             v = v and true or false
             state = v
-            TweenService:Create(frame, TweenInfo.new(0.18), {BackgroundColor3 = state and C.Accent or C.PanelInner}):Play()
-            TweenService:Create(knob, TweenInfo.new(0.18), {Position = state and UDim2.fromOffset(19,3) or UDim2.fromOffset(3,3)}):Play()
+            TweenService:Create(frame, TweenInfo.new(0.18), {
+                BackgroundColor3 = state and C.Accent or C.PanelInner,
+            }):Play()
+            TweenService:Create(knob, TweenInfo.new(0.18), {
+                Position = state and UDim2.fromOffset(19, 3) or UDim2.fromOffset(3, 3),
+            }):Play()
             if callback then pcall(callback, state) end
         end
-        btn.MouseButton1Click:Connect(function() setState(not state) end)
-        return {setState = setState, getState = function() return state end, frame = row}
+        btn.MouseButton1Click:Connect(function()
+            setState(not state)
+        end)
+        return {
+            setState = setState,
+            getState = function() return state end,
+            frame = row,
+        }
     end
 
     local function createSlider(parent, label, min, max, default, callback)
@@ -715,38 +938,55 @@ function FractureUI:CreateWindow(config)
             Parent = parent,
             Size = UDim2.new(1, 0, 0, 42),
             BackgroundTransparency = 1,
-            LayoutOrder = parent:GetChildren() and #parent:GetChildren() + 1 or 1,
         })
         new("TextLabel", {
-            Parent = row, Size = UDim2.new(1, -180, 1, 0),
-            BackgroundTransparency = 1, Text = label,
-            TextColor3 = C.TextDim, TextSize = 13, Font = Enum.Font.Gotham,
+            Parent = row,
+            Size = UDim2.new(1, -180, 1, 0),
+            BackgroundTransparency = 1,
+            Text = label,
+            TextColor3 = C.TextDim,
+            TextSize = 13,
+            Font = Enum.Font.Gotham,
             TextXAlignment = Enum.TextXAlignment.Left,
         })
         local trackWidth = 160
         local valBox = new("TextBox", {
-            Parent = row, Size = UDim2.fromOffset(50, 18),
+            Parent = row,
+            Size = UDim2.fromOffset(50, 18),
             Position = UDim2.new(1, -trackWidth - 60, 0.5, -9),
-            BackgroundTransparency = 1, Text = tostring(math.floor(default + 0.5)),
-            TextColor3 = C.Text, TextSize = 12, Font = Enum.Font.GothamMedium,
-            TextXAlignment = Enum.TextXAlignment.Right, ClearTextOnFocus = true,
+            BackgroundTransparency = 1,
+            Text = tostring(math.floor(default + 0.5)),
+            TextColor3 = C.Text,
+            TextSize = 12,
+            Font = Enum.Font.GothamMedium,
+            TextXAlignment = Enum.TextXAlignment.Right,
+            ClearTextOnFocus = true,
         })
         local track = new("Frame", {
-            Parent = row, Size = UDim2.fromOffset(trackWidth, 4),
+            Parent = row,
+            Size = UDim2.fromOffset(trackWidth, 4),
             Position = UDim2.new(1, -trackWidth, 0.5, -2),
-            BackgroundColor3 = C.PanelInner, BorderSizePixel = 0,
+            BackgroundColor3 = C.PanelInner,
+            BorderSizePixel = 0,
         })
         corner(track, 999)
-        local fill = new("Frame", {Parent = track, BackgroundColor3 = C.Accent, BorderSizePixel = 0})
+        local fill = new("Frame", {
+            Parent = track,
+            BackgroundColor3 = C.Accent,
+            BorderSizePixel = 0,
+        })
         corner(fill, 999)
         local knob = new("Frame", {
-            Parent = track, Size = UDim2.fromOffset(14, 14),
-            BackgroundColor3 = Color3.new(1,1,1), BorderSizePixel = 0, ZIndex = 2,
+            Parent = track,
+            Size = UDim2.fromOffset(14, 14),
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            BorderSizePixel = 0,
+            ZIndex = 2,
         })
         corner(knob, 999)
         local value = default
+
         local function setVal(v, fire)
-            if type(v) == "table" then v = v[1] or default end -- фикс
             v = tonumber(v) or default
             v = math.clamp(v, min, max)
             value = math.floor(v + 0.5)
@@ -756,16 +996,25 @@ function FractureUI:CreateWindow(config)
             valBox.Text = tostring(value)
             if fire and callback then pcall(callback, value) end
         end
+
         setVal(default, false)
+
         local btn = new("TextButton", {
-            Parent = track, Size = UDim2.new(1, 0, 1, 18),
+            Parent = track,
+            Size = UDim2.new(1, 0, 1, 18),
             Position = UDim2.fromOffset(0, -7),
-            BackgroundTransparency = 1, Text = "",
+            BackgroundTransparency = 1,
+            Text = "",
         })
+
         local dragging = false
-        btn.MouseButton1Down:Connect(function() dragging = true end)
+        btn.MouseButton1Down:Connect(function()
+            dragging = true
+        end)
         UserInputService.InputEnded:Connect(function(i)
-            if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+            if i.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = false
+            end
         end)
         UserInputService.InputChanged:Connect(function(i)
             if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
@@ -776,88 +1025,57 @@ function FractureUI:CreateWindow(config)
                 setVal(min + (max - min) * p, true)
             end
         end)
+
         valBox.FocusLost:Connect(function()
             local n = tonumber((valBox.Text:gsub("[^%-%d%.]", "")))
-            if n then setVal(n, true) else setVal(value, false) end
+            if n then
+                setVal(n, true)
+            else
+                setVal(value, false)
+            end
         end)
-        return {setValue = function(v) setVal(v, true) end, getValue = function() return value end, frame = row}
+
+        return {
+            setValue = function(v) setVal(v, true) end,
+            getValue = function() return value end,
+            frame = row,
+        }
     end
 
-    local function createDropdown(parent, label, options, default, callback)
+    local function createButton(parent, label, color, onClick)
         local row = new("Frame", {
             Parent = parent,
             Size = UDim2.new(1, 0, 0, 36),
             BackgroundTransparency = 1,
-            LayoutOrder = parent:GetChildren() and #parent:GetChildren() + 1 or 1,
         })
-        new("TextLabel", {
-            Parent = row, Size = UDim2.new(1, -180, 1, 0),
-            BackgroundTransparency = 1, Text = label,
-            TextColor3 = C.TextDim, TextSize = 13, Font = Enum.Font.Gotham,
-            TextXAlignment = Enum.TextXAlignment.Left,
+        local btn = new("TextButton", {
+            Parent = row,
+            Size = UDim2.fromScale(1, 1),
+            BackgroundColor3 = color or C.Accent,
+            BorderSizePixel = 0,
+            Text = label,
+            TextColor3 = C.Text,
+            TextSize = 13,
+            Font = Enum.Font.GothamMedium,
+            AutoButtonColor = false,
         })
-        local dd = new("TextButton", {
-            Parent = row, Size = UDim2.fromOffset(150, 28),
-            Position = UDim2.new(1, -150, 0.5, -14),
-            BackgroundColor3 = C.PanelInner, BorderSizePixel = 0,
-            Text = "", AutoButtonColor = false,
-        })
-        corner(dd, 6)
-        local txtL = new("TextLabel", {
-            Parent = dd, Size = UDim2.new(1, -28, 1, 0),
-            Position = UDim2.fromOffset(10, 0), BackgroundTransparency = 1,
-            Text = tostring(default), TextColor3 = C.Text, TextSize = 12,
-            Font = Enum.Font.GothamMedium, TextXAlignment = Enum.TextXAlignment.Left,
-        })
-        local arrow = new("ImageLabel", {
-            Parent = dd, Size = UDim2.fromOffset(14, 14),
-            Position = UDim2.new(1, -22, 0.5, -7),
-            BackgroundTransparency = 1, Image = Icons.chevDown, ImageColor3 = C.TextDim,
-        })
-        local current = default
-        local function setValue(v)
-            for _, opt in ipairs(options) do
-                if tostring(opt) == tostring(v) then
-                    current = opt
-                    txtL.Text = tostring(opt)
-                    if callback then pcall(callback, opt) end
-                    return
-                end
-            end
-        end
-        dd.MouseButton1Click:Connect(function()
-            local pop = new("Frame", {
-                Parent = OverlayGui,
-                Size = UDim2.fromOffset(150, 0),
-                BackgroundColor3 = C.Panel, BorderSizePixel = 0,
-                Visible = true, ClipsDescendants = true,
-            })
-            corner(pop, 10); ustroke(pop, C.BorderBrt, 1, 0.3)
-            new("UIListLayout", {SortOrder = Enum.SortOrder.LayoutOrder, Parent = pop})
-            new("UIPadding", { Parent = pop, PaddingTop = UDim.new(0, 4), PaddingBottom = UDim.new(0, 4), PaddingLeft = UDim.new(0, 4), PaddingRight = UDim.new(0, 4) })
-            local p = dd.AbsolutePosition; local s = dd.AbsoluteSize
-            pop.Position = UDim2.fromOffset(p.X, p.Y + s.Y + 4)
-            for i, opt in ipairs(options) do
-                local item = new("TextButton", {
-                    Parent = pop, Size = UDim2.new(1, 0, 0, 26),
-                    BackgroundColor3 = C.PanelHover, BackgroundTransparency = 1,
-                    BorderSizePixel = 0, Text = "  " .. tostring(opt),
-                    TextColor3 = (tostring(opt) == tostring(current)) and C.Accent or C.Text,
-                    TextSize = 12, Font = Enum.Font.Gotham,
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    AutoButtonColor = false, LayoutOrder = i,
-                })
-                corner(item, 5)
-                item.MouseEnter:Connect(function() item.BackgroundTransparency = 0 end)
-                item.MouseLeave:Connect(function() item.BackgroundTransparency = 1 end)
-                item.MouseButton1Click:Connect(function()
-                    setValue(opt)
-                    pop:Destroy()
-                end)
-            end
-            pop.Size = UDim2.fromOffset(150, math.min(#options, 6) * 26 + 8)
+        corner(btn, 6)
+        btn.MouseEnter:Connect(function()
+            TweenService:Create(btn, TweenInfo.new(0.15), {
+                BackgroundColor3 = (color or C.Accent):Lerp(Color3.new(1, 1, 1), 0.1),
+            }):Play()
         end)
-        return {setValue = setValue, getValue = function() return current end, frame = row}
+        btn.MouseLeave:Connect(function()
+            TweenService:Create(btn, TweenInfo.new(0.15), {
+                BackgroundColor3 = color or C.Accent,
+            }):Play()
+        end)
+        btn.MouseButton1Click:Connect(function()
+            if onClick then pcall(onClick) end
+        end)
+        return {
+            frame = row,
+        }
     end
 
     local function createKeybind(parent, label, default, callback)
@@ -865,14 +1083,18 @@ function FractureUI:CreateWindow(config)
             Parent = parent,
             Size = UDim2.new(1, 0, 0, 36),
             BackgroundTransparency = 1,
-            LayoutOrder = parent:GetChildren() and #parent:GetChildren() + 1 or 1,
         })
         new("TextLabel", {
-            Parent = row, Size = UDim2.new(1, -180, 1, 0),
-            BackgroundTransparency = 1, Text = label,
-            TextColor3 = C.TextDim, TextSize = 13, Font = Enum.Font.Gotham,
+            Parent = row,
+            Size = UDim2.new(1, -180, 1, 0),
+            BackgroundTransparency = 1,
+            Text = label,
+            TextColor3 = C.TextDim,
+            TextSize = 13,
+            Font = Enum.Font.Gotham,
             TextXAlignment = Enum.TextXAlignment.Left,
         })
+
         local function keyName(k)
             if not k then return "None" end
             if typeof(k) == "EnumItem" then
@@ -886,21 +1108,31 @@ function FractureUI:CreateWindow(config)
             end
             return tostring(k)
         end
+
         local btn = new("TextButton", {
-            Parent = row, Size = UDim2.fromOffset(150, 28),
+            Parent = row,
+            Size = UDim2.fromOffset(150, 28),
             Position = UDim2.new(1, -150, 0.5, -14),
-            BackgroundColor3 = C.PanelInner, BorderSizePixel = 0,
-            Text = keyName(default), TextColor3 = C.Text,
-            TextSize = 12, Font = Enum.Font.GothamMedium,
+            BackgroundColor3 = C.PanelInner,
+            BorderSizePixel = 0,
+            Text = keyName(default),
+            TextColor3 = C.Text,
+            TextSize = 12,
+            Font = Enum.Font.GothamMedium,
             AutoButtonColor = false,
         })
         corner(btn, 6)
+
         local current = default
         local listening = false
         local listenerConn
+
         btn.MouseButton1Click:Connect(function()
             if listening then return end
-            listening = true; btn.Text = "..."; btn.TextColor3 = C.Accent
+            listening = true
+            btn.Text = "..."
+            btn.TextColor3 = C.Accent
+
             listenerConn = UserInputService.InputBegan:Connect(function(input, gp)
                 if not listening then return end
                 local k
@@ -913,35 +1145,26 @@ function FractureUI:CreateWindow(config)
                 end
                 if k then
                     current = k
-                    btn.Text = keyName(k); btn.TextColor3 = C.Text
+                    btn.Text = keyName(k)
+                    btn.TextColor3 = C.Text
                     listening = false
-                    if listenerConn then listenerConn:Disconnect(); listenerConn = nil end
+                    if listenerConn then
+                        listenerConn:Disconnect()
+                        listenerConn = nil
+                    end
                     if callback then pcall(callback, k) end
                 end
             end)
         end)
-        return {setKey = function(k) current = k; btn.Text = keyName(k) end, getKey = function() return current end, frame = row}
-    end
 
-    local function createButton(parent, label, color, onClick)
-        local row = new("Frame", {
-            Parent = parent,
-            Size = UDim2.new(1, 0, 0, 36),
-            BackgroundTransparency = 1,
-            LayoutOrder = parent:GetChildren() and #parent:GetChildren() + 1 or 1,
-        })
-        local btn = new("TextButton", {
-            Parent = row, Size = UDim2.fromScale(1,1),
-            BackgroundColor3 = color or C.PanelInner, BorderSizePixel = 0,
-            Text = label, TextColor3 = C.Text,
-            TextSize = 13, Font = Enum.Font.GothamMedium,
-            AutoButtonColor = false,
-        })
-        corner(btn, 6)
-        btn.MouseEnter:Connect(function() TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = (color or C.PanelInner):Lerp(Color3.new(1,1,1), 0.1)}):Play() end)
-        btn.MouseLeave:Connect(function() TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = color or C.PanelInner}):Play() end)
-        btn.MouseButton1Click:Connect(function() if onClick then pcall(onClick) end end)
-        return {frame = row}
+        return {
+            setKey = function(k)
+                current = k
+                btn.Text = keyName(k)
+            end,
+            getKey = function() return current end,
+            frame = row,
+        }
     end
 
     -- ============================================
@@ -963,62 +1186,95 @@ function FractureUI:CreateWindow(config)
         end
     end
 
-    MinBtn.MouseButton1Click:Connect(function() setMinimized(not minimized) end)
+    MinBtn.MouseButton1Click:Connect(function()
+        setMinimized(not minimized)
+    end)
 
     local function confirmDialog(text, onYes)
         local cgui = new("ScreenGui", {
-            Name = "FractureConfirm", Parent = UI_PARENT,
-            ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-            DisplayOrder = 99500, IgnoreGuiInset = true,
+            Name = "FractureConfirm",
+            Parent = UI_PARENT,
+            ResetOnSpawn = false,
+            ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+            DisplayOrder = 99500,
+            IgnoreGuiInset = true,
         })
         local dim = new("Frame", {
-            Parent = cgui, Size = UDim2.fromScale(1,1),
-            BackgroundColor3 = Color3.new(0,0,0), BackgroundTransparency = 1,
+            Parent = cgui,
+            Size = UDim2.fromScale(1, 1),
+            BackgroundColor3 = Color3.new(0, 0, 0),
+            BackgroundTransparency = 1,
             BorderSizePixel = 0,
         })
         TweenService:Create(dim, TweenInfo.new(0.2), {BackgroundTransparency = 0.55}):Play()
 
         local W, H = 400, 160
         local box = new("Frame", {
-            Parent = dim, Size = UDim2.fromOffset(0, 0),
+            Parent = dim,
+            Size = UDim2.fromOffset(0, 0),
             Position = UDim2.new(0.5, 0, 0.5, 0),
-            BackgroundColor3 = C.Bg, BorderSizePixel = 0,
+            BackgroundColor3 = C.Bg,
+            BorderSizePixel = 0,
             ClipsDescendants = true,
         })
-        corner(box, 12); ustroke(box, C.BorderBrt, 1, 0.3)
-        new("TextLabel", { Parent = box,
+        corner(box, 12)
+        ustroke(box, C.BorderBrt, 1, 0.3)
+        new("TextLabel", {
+            Parent = box,
             Size = UDim2.new(1, -32, 0, 80),
             Position = UDim2.fromOffset(16, 16),
             BackgroundTransparency = 1,
-            Text = text, TextColor3 = C.Text, TextSize = 16,
-            Font = Enum.Font.GothamMedium, TextWrapped = true,
+            Text = text,
+            TextColor3 = C.Text,
+            TextSize = 16,
+            Font = Enum.Font.GothamMedium,
+            TextWrapped = true,
             TextXAlignment = Enum.TextXAlignment.Center,
-            TextYAlignment = Enum.TextYAlignment.Center })
+            TextYAlignment = Enum.TextYAlignment.Center,
+        })
+
         local btnW = (W - 16 * 2 - 8) / 2
-        local yes = new("TextButton", { Parent = box, Size = UDim2.fromOffset(btnW, 34),
+        local yes = new("TextButton", {
+            Parent = box,
+            Size = UDim2.fromOffset(btnW, 34),
             Position = UDim2.fromOffset(16, H - 50),
-            BackgroundColor3 = C.Danger, BorderSizePixel = 0,
-            Text = "Yes", TextColor3 = Color3.new(1,1,1),
-            TextSize = 13, Font = Enum.Font.GothamBold,
-            AutoButtonColor = false })
+            BackgroundColor3 = C.Danger,
+            BorderSizePixel = 0,
+            Text = "Yes",
+            TextColor3 = Color3.new(1, 1, 1),
+            TextSize = 13,
+            Font = Enum.Font.GothamBold,
+            AutoButtonColor = false,
+        })
         corner(yes, 8)
-        local no = new("TextButton", { Parent = box, Size = UDim2.fromOffset(btnW, 34),
+
+        local no = new("TextButton", {
+            Parent = box,
+            Size = UDim2.fromOffset(btnW, 34),
             Position = UDim2.fromOffset(16 + btnW + 8, H - 50),
-            BackgroundColor3 = C.PanelInner, BorderSizePixel = 0,
-            Text = "No", TextColor3 = C.Text,
-            TextSize = 13, Font = Enum.Font.GothamBold,
-            AutoButtonColor = false })
+            BackgroundColor3 = C.PanelInner,
+            BorderSizePixel = 0,
+            Text = "No",
+            TextColor3 = C.Text,
+            TextSize = 13,
+            Font = Enum.Font.GothamBold,
+            AutoButtonColor = false,
+        })
         corner(no, 8)
-        yes.MouseEnter:Connect(function() TweenService:Create(yes, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(245, 110, 120)}):Play() end)
-        yes.MouseLeave:Connect(function() TweenService:Create(yes, TweenInfo.new(0.15), {BackgroundColor3 = C.Danger}):Play() end)
-        no.MouseEnter:Connect(function() TweenService:Create(no, TweenInfo.new(0.15), {BackgroundColor3 = C.PanelHover}):Play() end)
-        no.MouseLeave:Connect(function() TweenService:Create(no, TweenInfo.new(0.15), {BackgroundColor3 = C.PanelInner}):Play() end)
-        local function close() cgui:Destroy() end
-        yes.MouseButton1Click:Connect(function() close(); if onYes then onYes() end end)
+
+        local function close()
+            cgui:Destroy()
+        end
+
+        yes.MouseButton1Click:Connect(function()
+            close()
+            if onYes then onYes() end
+        end)
         no.MouseButton1Click:Connect(close)
+
         TweenService:Create(box, TweenInfo.new(0.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
             Size = UDim2.fromOffset(W, H),
-            Position = UDim2.new(0.5, -W/2, 0.5, -H/2),
+            Position = UDim2.new(0.5, -W / 2, 0.5, -H / 2),
         }):Play()
     end
 
@@ -1029,32 +1285,45 @@ function FractureUI:CreateWindow(config)
         end)
     end)
 
-    -- Drag
+    -- Перетаскивание
     local dragging = false
     local dragStart, startPos
     local dragHandle = new("TextButton", {
-        Parent = Main, Size = UDim2.new(1, -350, 0, 50),
+        Parent = Main,
+        Size = UDim2.new(1, -350, 0, 50),
         Position = UDim2.fromOffset(270, 0),
-        BackgroundTransparency = 1, Text = "",
-        AutoButtonColor = false, ZIndex = 0,
+        BackgroundTransparency = 1,
+        Text = "",
+        AutoButtonColor = false,
+        ZIndex = 0,
     })
+
     dragHandle.MouseButton1Down:Connect(function()
         dragging = true
         dragStart = UserInputService:GetMouseLocation()
         startPos = Main.Position
     end)
+
     UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
     end)
+
     RunService.RenderStepped:Connect(function()
         if dragging then
             local mp = UserInputService:GetMouseLocation()
             local d = mp - dragStart
-            Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
+            Main.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + d.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + d.Y
+            )
         end
     end)
 
-    -- Bind
+    -- Бинд для открытия/закрытия
     UserInputService.InputBegan:Connect(function(input, gp)
         if gp then return end
         if input.KeyCode == bindKey then
@@ -1070,24 +1339,34 @@ function FractureUI:CreateWindow(config)
     -- ============================================
     local api = {
         notify = notify,
-        setTheme = setTheme,
-        setNotificationEnabled = function(state) notificationEnabled = state end,
+        setNotificationEnabled = function(state)
+            notificationEnabled = state
+        end,
         getUI = function() return ScreenGui end,
         getMain = function() return Main end,
         getTabs = function() return Tabs end,
         getCurrentTab = function() return CurrentTab end,
-        close = function() ScreenGui:Destroy(); OverlayGui:Destroy() end,
-        minimize = function() setMinimized(true) end,
-        restore = function() setMinimized(false) end,
+        close = function()
+            ScreenGui:Destroy()
+            OverlayGui:Destroy()
+        end,
+        minimize = function()
+            setMinimized(true)
+        end,
+        restore = function()
+            setMinimized(false)
+        end,
         colors = C,
-        -- Создание элементов
         createToggle = createToggle,
         createSlider = createSlider,
-        createDropdown = createDropdown,
-        createKeybind = createKeybind,
         createButton = createButton,
-        -- Получить контейнер вкладки
-        getTabContent = function(key) return Tabs[key] and Tabs[key].content end,
+        createKeybind = createKeybind,
+        getTabContent = function(key)
+            return Tabs[key] and Tabs[key].content
+        end,
+        getTabName = function(key)
+            return Tabs[key] and Tabs[key].name
+        end,
     }
 
     return api
